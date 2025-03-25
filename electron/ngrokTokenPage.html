@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<body>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+    <h1>輸入Ngrok Token</h1>
+    <input type="text" id="token" placeholder="直接貼上Token即可(請檢查TOKEN前後無空白)" />
+    <button id="submit">Submit</button>
+    <div id="error-message"></div>
+
+    <script>
+        const errorDisplay = document.getElementById('error-message');
+        const tokenInput = document.getElementById('token');
+        const submitButton = document.getElementById('submit');
+
+        function showError(message) {
+            console.error(message);
+            errorDisplay.textContent = message;
+            submitButton.disabled = false;
+        }
+
+        submitButton.addEventListener('click', async () => {
+            submitButton.disabled = true;
+            errorDisplay.textContent = '';
+
+            try {
+
+                if (!window.electron) {
+                    throw new Error('Electron溝通失敗');
+                }
+
+                const token = tokenInput.value.trim();
+
+                if (!token) {
+                    showError('請輸入正確的Ngrok Token');
+                    return;
+                }
+
+                await window.electron.sendToken(token);
+
+                window.electron.closeWindow();
+
+            } catch (error) {
+                showError(`錯誤訊息: ${error.message}`);
+            }
+        });
+    </script>
+</body>
